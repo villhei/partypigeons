@@ -1,12 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-
-
-const App = () => <h1>Hello</h1>
-
-
+import Main from './Main'
 
 const rootElem = document.getElementById('app')
 
-
-ReactDOM.render(<App/>, rootElem)
+ReactDOM.render(<Main />, rootElem)
