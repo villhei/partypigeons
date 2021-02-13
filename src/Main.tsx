@@ -11,20 +11,20 @@ import Background from './scene/Background'
 const GlobalStyle = createGlobalStyle`
   body {
     background: black;
+    padding: 2em;
     display: flex;
     justify-content: center;
-    width: 100%;
   }
 `
 
 const BORDER_COLOR = 'gray'
 
 const ContentContainer = styled.div`
-  border-top: 1px solid ${BORDER_COLOR};
-  border-bottom: 1px solid ${BORDER_COLOR};
+  border: 1px solid ${BORDER_COLOR};
   width: max(1280px, 80vw);
   height: max(720px, 45vw);
   overflow: hidden;
+  position: relative;
 `
 
 export default function Main() {
