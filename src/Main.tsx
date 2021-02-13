@@ -1,7 +1,8 @@
 import React from 'react'
 import AppContainer from '~/ui/AppContainer'
 import styled, { createGlobalStyle } from 'styled-components'
-import Floor from './scene/Floor'
+import FloorBackground from './scene/FloorBackground'
+import FloorGrid from './scene/FloorGrid'
 import Palms from './scene/Palms'
 import Layer from './ui/Layer'
 import Pigeons from './scene/Pigeons'
@@ -28,7 +29,7 @@ const ContentContainer = styled.div`
 `
 
 export default function Main() {
-  const layers = [Background, Sun, Palms, Floor, Pigeons]
+  const layers = [Background, Sun, Palms, FloorBackground, FloorGrid, Pigeons]
   return (
     <>
       <GlobalStyle />

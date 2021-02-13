@@ -1,12 +1,10 @@
-import React from 'react'
 import styled from 'styled-components'
-import floor from './floor.svg'
 
-const StyledImg = styled.img`
+const FloorBackground = styled.div`
   justify-self: center;
   align-self: flex-end;
   display: flex;
-  height: auto;
+  height: 100%;
   width: 100%;
   background: linear-gradient(
     0,
@@ -18,8 +16,9 @@ const StyledImg = styled.img`
     rgb(123, 19, 148) 58.099999999999994%,
     rgb(255, 42, 232) 100%
   );
+  background-size: 100% 46%;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
 `
 
-export const Floor = () => <StyledImg src={floor} />
-
-export default Floor
+export default FloorBackground
