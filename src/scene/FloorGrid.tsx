@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import animationConfig from '~/animations'
 import { range } from '~/util'
 
 const StyledSVG = styled.svg`
@@ -17,10 +18,12 @@ const Container = styled.div`
 
 const FLOOR_TILE_SIZE = 32
 
-const FLOOR_TILE_SIZE_X = FLOOR_TILE_SIZE * 0.5
-const FLOOR_TILE_SIZE_Z = FLOOR_TILE_SIZE * 1.5
+const FLOOR_TILE_SIZE_X = FLOOR_TILE_SIZE * 1
+const FLOOR_TILE_SIZE_Z = FLOOR_TILE_SIZE * 1.2
 
-const DISTANCE = FLOOR_TILE_SIZE * 7
+const Y_POSITION = 43
+
+const DISTANCE = Y_POSITION * 5
 
 function calculatePosition(x: number, y: number, z: number): Pair {
   return [x * (DISTANCE / (z + DISTANCE)), y * (DISTANCE / (z + DISTANCE))]
@@ -29,22 +32,32 @@ function calculatePosition(x: number, y: number, z: number): Pair {
 type SquareProps = {
   x: number
   y: number
+  delay: number
+  isEnabled: boolean
 }
-
-const Y_POSITION = DISTANCE * 0.07
 
 type Pair = [number, number]
 
+type AnimationProps = {
+  delay: number
+  isEnabled: boolean
+}
 const FloorSquare = styled.path`
   fill: none;
   stroke: white;
   stroke-width: 0.1;
+  ${(props: AnimationProps) =>
+    props.isEnabled ? animationConfig.squaresHighlight : undefined}
+  animation-delay: ${(props: AnimationProps) => props.delay}s;
 `
 
-const subtract = ([la, lb]: Pair, [ra, rb]: Pair): Pair => [la - ra, lb - rb]
+const subtract = ([leftA, leftB]: Pair, [rightA, rightB]: Pair): Pair => [
+  leftA - rightA,
+  leftB - rightB
+]
 
 const Square: React.FC<SquareProps> = (props) => {
-  const { x, y } = props
+  const { x, y, delay, isEnabled } = props
   const xx = FLOOR_TILE_SIZE_X * x
   const zz = FLOOR_TILE_SIZE_Z * y
   const zHalf = FLOOR_TILE_SIZE_Z * 0.5
@@ -72,21 +85,26 @@ const Square: React.FC<SquareProps> = (props) => {
     `l${topLeft.join(',')}`,
     `l${origin.join(',')}`
   ].join(' ')
-
-  return <FloorSquare d={path} />
+  return <FloorSquare d={path} delay={3 + delay} isEnabled={isEnabled} />
 }
 
 export const FloorGrid = () => {
   const columns = range(-18, 18)
-  const rows = range(-4, 5)
+  const rows = range(-5, 8)
   return (
     <Container>
       <StyledSVG viewBox="-160 -90 320 180">
-        <g>
-          {rows.map((row) => (
+        <g transform="translate(0, -11)">
+          {rows.map((row, j) => (
             <g key={row}>
-              {columns.map((column) => (
-                <Square key={column} x={column} y={row} />
+              {columns.map((column, i) => (
+                <Square
+                  key={column}
+                  x={column}
+                  y={row}
+                  isEnabled={(column * row) % 4 === 0}
+                  delay={Math.abs(row * column) * 0.7}
+                />
               ))}
             </g>
           ))}
