@@ -7,26 +7,28 @@ const StyledSVG = styled.svg`
   justify-self: center;
   align-self: flex-end;
   display: flex;
-  height: auto;
+  height: 46%;
   width: 100%;
 `
 
-const Container = styled.div`
-  width: 100%;
-  height: 100%;
-`
+const FLOOR_TILE_SIZE = 40
 
-const FLOOR_TILE_SIZE = 32
+const FLOOR_TILE_SIZE_X = FLOOR_TILE_SIZE * 1.6
+const FLOOR_TILE_SIZE_Z = FLOOR_TILE_SIZE * 1
 
-const FLOOR_TILE_SIZE_X = FLOOR_TILE_SIZE * 1
-const FLOOR_TILE_SIZE_Z = FLOOR_TILE_SIZE * 1.2
+const FLOOR_POSITION_Y = 0
 
-const Y_POSITION = 43
+const EYE_POSITION = [0, -FLOOR_TILE_SIZE * 4, FLOOR_TILE_SIZE * 5]
 
-const DISTANCE = Y_POSITION * 5
+const ORIGIN_3D = [0, -190, 0]
 
 function calculatePosition(x: number, y: number, z: number): Pair {
-  return [x * (DISTANCE / (z + DISTANCE)), y * (DISTANCE / (z + DISTANCE))]
+  return [
+    ORIGIN_3D[0] +
+      (x - EYE_POSITION[0]) * (EYE_POSITION[2] / (z + EYE_POSITION[2])),
+    ORIGIN_3D[1] +
+      (y - EYE_POSITION[1]) * (EYE_POSITION[2] / (z + EYE_POSITION[2]))
+  ]
 }
 
 type SquareProps = {
@@ -34,6 +36,7 @@ type SquareProps = {
   y: number
   delay: number
   isEnabled: boolean
+  isDebug: boolean
 }
 
 type Pair = [number, number]
@@ -57,19 +60,22 @@ const subtract = ([leftA, leftB]: Pair, [rightA, rightB]: Pair): Pair => [
 ]
 
 const Square: React.FC<SquareProps> = (props) => {
-  const { x, y, delay, isEnabled } = props
+  const { x, y, delay, isEnabled, isDebug } = props
   const xx = FLOOR_TILE_SIZE_X * x
   const zz = FLOOR_TILE_SIZE_Z * y
+  const yy = FLOOR_POSITION_Y
   const zHalf = FLOOR_TILE_SIZE_Z * 0.5
   const xHalf = FLOOR_TILE_SIZE_X * 0.5
   const points = [
-    [xx - xHalf, Y_POSITION, zz - zHalf],
-    [xx + xHalf, Y_POSITION, zz - zHalf],
-    [xx + xHalf, Y_POSITION, zz + zHalf],
-    [xx - xHalf, Y_POSITION, zz + zHalf]
+    [xx - xHalf, yy, zz - zHalf],
+    [xx + xHalf, yy, zz - zHalf],
+    [xx + xHalf, yy, zz + zHalf],
+    [xx - xHalf, yy, zz + zHalf]
   ]
 
   const projected = points.map(([x, y, z]) => calculatePosition(x, y, z))
+
+  const textOrigin = calculatePosition(xx, yy, zz)
 
   const [a, b, c, d] = projected
 
@@ -85,32 +91,60 @@ const Square: React.FC<SquareProps> = (props) => {
     `l${topLeft.join(',')}`,
     `l${origin.join(',')}`
   ].join(' ')
-  return <FloorSquare d={path} delay={3 + delay} isEnabled={isEnabled} />
+  return (
+    <>
+      <FloorSquare d={path} delay={3 + delay} isEnabled={isEnabled} />
+      {isDebug && (
+        <>
+          <circle
+            cx={textOrigin[0]}
+            cy={textOrigin[1]}
+            fill="white"
+            r={1}
+            opacity={0.5}
+          />
+          <text
+            x={textOrigin[0]}
+            y={textOrigin[1] - 5}
+            textAnchor="middle"
+            font-size="4"
+            style={{
+              fill: 'white'
+            }}
+          >
+            {[x, y].join(', ')}
+          </text>
+        </>
+      )}
+    </>
+  )
 }
 
+const FLOOR_DEPTH = 2
+const FLOOR_WIDTH = 8
+
 export const FloorGrid = () => {
-  const columns = range(-18, 18)
-  const rows = range(-5, 8)
+  const columns = range(-FLOOR_WIDTH, FLOOR_WIDTH)
+  const rows = range(-FLOOR_DEPTH, FLOOR_DEPTH + 2)
   return (
-    <Container>
-      <StyledSVG viewBox="-160 -90 320 180">
-        <g transform="translate(0, -11)">
-          {rows.map((row, j) => (
-            <g key={row}>
-              {columns.map((column, i) => (
-                <Square
-                  key={column}
-                  x={column}
-                  y={row}
-                  isEnabled={(column * row) % 4 === 0}
-                  delay={Math.abs(row * column) * 0.7}
-                />
-              ))}
-            </g>
-          ))}
-        </g>
-      </StyledSVG>
-    </Container>
+    <StyledSVG viewBox="-160 -90 320 180">
+      <g>
+        {rows.map((row, j) => (
+          <g key={row}>
+            {columns.map((column, i) => (
+              <Square
+                key={column}
+                x={column}
+                y={row}
+                isEnabled={(column * row) % 4 === 0}
+                isDebug={false}
+                delay={Math.abs(row * column) * 0.7}
+              />
+            ))}
+          </g>
+        ))}
+      </g>
+    </StyledSVG>
   )
 }
 
