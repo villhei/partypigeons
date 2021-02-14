@@ -24,8 +24,8 @@ const rectanglePathPoints = (
   tileSizeX: number,
   tileSizeY: number
 ) => {
-  const zHalf = tileSizeX * 0.5
-  const xHalf = tileSizeY * 0.5
+  const zHalf = tileSizeY * 0.5
+  const xHalf = tileSizeX * 0.5
 
   const pathPoints = [
     Vec3D(-xHalf, 0, -zHalf),
@@ -70,8 +70,8 @@ const ProjectedSquare: React.FC<ProjectedSquareProps> = (props) => {
   } = props
 
   const tileSizeX = tileSize * 1.6
+  const tileSizeZ = tileSize
 
-  const tileSizeZ = tileSize * 1
   const positionY = 0
 
   const position3D = Vec3D(tileSizeX * x, positionY, tileSizeZ * y)
