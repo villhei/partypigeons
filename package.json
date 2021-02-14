@@ -7,7 +7,7 @@
     "start": "parcel -p 8080 watch src/index.html",
     "build": "parcel build src/index.html",
     "build:github": "rm -rf docs && parcel build --public-url .  src/index.html -d docs",
-    "release": "rm -rf docs && npm run build:github && git add docs && git commit -m \"Update release\"",
+    "release": "rm -rf docs && npm run build:github && git add docs && git commit -m \"auto: Update release\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "husky install"
   },
