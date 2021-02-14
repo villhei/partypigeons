@@ -1,16 +1,33 @@
 import React from 'react'
 import styled from 'styled-components'
 import animationConfig from '~/animations'
-import pigeons from './pigeons.svg'
+import Layer from '~/ui/Layer'
+import pigeon from './pigeon_1.svg'
+import pigeon2 from './pigeon_2.svg'
 
-const StyledImg = styled.img`
+const PigeonFirst = styled.img`
   align-self: center;
-  height: 65%;
+  height: 55%;
   width: 100%;
-  margin-bottom: -5%;
-  ${animationConfig.pigeons}
+  ${animationConfig.pigeon1}
 `
 
-export const Pigeons = () => <StyledImg src={pigeons} />
+const PigeonSecond = styled.img`
+  align-self: center;
+  height: 40%;
+  width: 100%;
+  ${animationConfig.pigeon2};
+`
+
+export const Pigeons = () => (
+  <>
+    <Layer>
+      <PigeonFirst src={pigeon} />
+    </Layer>
+    <Layer offsetX={30} offsetY={5}>
+      <PigeonSecond src={pigeon2} />
+    </Layer>
+  </>
+)
 
 export default Pigeons

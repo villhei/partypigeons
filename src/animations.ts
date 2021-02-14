@@ -22,6 +22,35 @@ const pulse = keyframes`
     50% {fill: rgba(255,255,255,0) }
     100% { fill: rgba(255,255,255,0.2) }
 `
+
+function makewiggleMove(
+  transformOrigin: string,
+  rotation: number,
+  movementDistance: number
+) {
+  return keyframes`
+    0% { 
+      transform-origin: ${transformOrigin}; 
+      transform: translate(0) rotate(0)
+    } 
+    25% { 
+      transform-origin: ${transformOrigin}; 
+      transform: translate(${movementDistance}%) rotate(${rotation}deg)} 
+    75% { 
+      transform-origin:${transformOrigin}; 
+      transform: translate(${movementDistance * -1}%) rotate(${
+    rotation * -1
+  }deg)} 
+    100% {
+      transform-origin: ${transformOrigin};  
+      transform: translate(0) rotate(0)
+      } 
+`
+}
+const wiggleMove1 = makewiggleMove('top center', 15, 10)
+
+const wiggleMove2 = makewiggleMove('top center', -15, -10)
+
 const SCENE_START_DELAY = '3s'
 
 const animationConfig = {
@@ -44,13 +73,23 @@ const animationConfig = {
     animation-duration: 8s;
     animation-iteration-count: infinite;
   `,
-  pigeons: css`
+  pigeon1: css`
     opacity: 0;
-    animation-name: ${fadeIn};
-    animation-fill-mode: forwards;
-    animation-duration: 1s;
-    animation-delay: 2s;
-    animation-iteration-count: 1;
+    animation-name: ${fadeIn}, ${wiggleMove1};
+    animation-fill-mode: forwards, forwards;
+    animation-duration: 1s, 1.5s;
+    animation-delay: 3s, 5s;
+    animation-iteration-count: 1, infinite;
+    animation-timing-function: ease-in, linear;
+  `,
+  pigeon2: css`
+    opacity: 0;
+    animation-name: ${fadeIn}, ${wiggleMove2};
+    animation-fill-mode: forwards, forwards;
+    animation-duration: 1s, 2s;
+    animation-delay: 3s, 5s;
+    animation-iteration-count: 1, infinite;
+    animation-timing-function: ease-in, linear;
   `,
   squaresHighlight: css`
     animation-name: ${pulse};
