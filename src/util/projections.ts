@@ -1,5 +1,10 @@
 import { Vec2D, Vector2D, Vector3D } from '~/util/vector'
 
+export type Scene = {
+  eye: Vector3D
+  origin: Vector3D
+}
+
 export function projectPosition(
   position: Vector3D,
   origin3D: Vector3D,
