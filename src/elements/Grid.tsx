@@ -2,8 +2,9 @@ import React from 'react'
 import styled from 'styled-components'
 import animationConfig from '~/animations'
 import { range } from '~/util/range'
+import DebugLabel from '~/elements/DebugLabel'
 import { projectPosition } from '~/util/projections'
-import { Vec3D } from '~/util/vector'
+import { Vec3D, Vector3D, Vector2D } from '~/util/vector'
 
 const FLOOR_TILE_SIZE = 40
 
@@ -12,21 +13,20 @@ const FLOOR_TILE_SIZE_Z = FLOOR_TILE_SIZE * 1
 
 const FLOOR_POSITION_Y = 0
 
-const EYE_POSITION = Vec3D(0, -FLOOR_TILE_SIZE * 4, FLOOR_TILE_SIZE * 5)
-
-const ORIGIN_3D = Vec3D(0, -190, 0)
-
-type SquareProps = {
-  x: number
-  y: number
-  delay: number
-  isEnabled: boolean
-  isDebug: boolean
-}
-
 type AnimationProps = {
   delay: number
   isEnabled: boolean
+}
+
+const SCENE: Scene = {
+  eye: Vec3D(0, -FLOOR_TILE_SIZE * 4, FLOOR_TILE_SIZE * 5),
+  origin: Vec3D(0, -190, 0)
+}
+
+type GridProps = {
+  rangeX: [number, number]
+  rangeY: [number, number]
+  isDebug: boolean
 }
 
 const FloorSquare = styled.path`
@@ -38,75 +38,78 @@ const FloorSquare = styled.path`
   animation-delay: ${(props: AnimationProps) => props.delay}s;
 `
 
-const CoordinateLabel = styled.text`
-  text-anchor: middle;
-  font-size: 5;
-  fill: white;
-`
+type SquareProps = {
+  x: number
+  y: number
+  delay: number
+  isEnabled: boolean
+  isDebug: boolean
+  scene: Scene
+}
 
-const CenterMarker = styled.circle`
-  fill: white;
-  r: 1;
-  opacity: 0.5;
-`
-
-const Square: React.FC<SquareProps> = (props) => {
-  const { x, y, delay, isEnabled, isDebug } = props
-  const gridPosition = Vec3D(
-    FLOOR_TILE_SIZE_X * x,
-    FLOOR_POSITION_Y,
-    FLOOR_TILE_SIZE_Z * y
-  )
+const rectanglePathPoints = (position: Vector3D) => {
   const zHalf = FLOOR_TILE_SIZE_Z * 0.5
   const xHalf = FLOOR_TILE_SIZE_X * 0.5
 
-  const points = [
+  const pathPoints = [
     Vec3D(-xHalf, 0, -zHalf),
     Vec3D(+xHalf, 0, -zHalf),
     Vec3D(+xHalf, 0, +zHalf),
     Vec3D(-xHalf, 0, +zHalf)
-  ].map((delta) => gridPosition.add(delta))
+  ].map((delta) => position.add(delta))
 
-  const projected = points.map((point) =>
-    projectPosition(point, ORIGIN_3D, EYE_POSITION)
-  )
+  return pathPoints
+}
 
-  const textOrigin = projectPosition(gridPosition, ORIGIN_3D, EYE_POSITION)
-
-  const [a, b, c, d] = projected
-
-  const bottomLeft = a
-  const bottomRight = b.subtract(a)
-  const topRight = c.subtract(b)
-  const topLeft = d.subtract(c)
-  const origin = a.subtract(d)
+const pointsToPath = (points: Array<Vector2D>): string => {
+  const [origin, ...rest] = points.map((point) => point.components().join(','))
 
   const path = [
-    `M${bottomLeft.components().join(',')}`,
-    `l${bottomRight.components().join(',')}`,
-    `l${topRight.components().join(',')}`,
-    `l${topLeft.components().join(',')}`,
-    `l${origin.components().join(',')}`
+    `M${origin}`,
+    ...[...rest, origin].map((point) => `L${point}`)
   ].join(' ')
+
+  return path
+}
+
+const Square: React.FC<SquareProps> = (props) => {
+  const {
+    x,
+    y,
+    delay,
+    isEnabled,
+    isDebug,
+    scene: { eye, origin }
+  } = props
+
+  const position3D = Vec3D(
+    FLOOR_TILE_SIZE_X * x,
+    FLOOR_POSITION_Y,
+    FLOOR_TILE_SIZE_Z * y
+  )
+
+  const pathPoints = rectanglePathPoints(position3D)
+
+  const projected = pathPoints.map((point) =>
+    projectPosition(point, origin, eye)
+  )
+
+  const centerPoint = projectPosition(position3D, origin, eye)
+
+  const path = pointsToPath(projected)
   return (
     <>
       <FloorSquare d={path} delay={3 + delay} isEnabled={isEnabled} />
       {isDebug && (
-        <>
-          <CenterMarker cx={textOrigin.x} cy={textOrigin.y} />
-          <CoordinateLabel x={textOrigin.x} y={textOrigin.y - 5}>
-            {[x, y].join(', ')}
-          </CoordinateLabel>
-        </>
+        <DebugLabel position={centerPoint} label={[x, y].join(', ')} />
       )}
     </>
   )
 }
 
-type GridProps = {
-  rangeX: [number, number]
-  rangeY: [number, number]
-  isDebug: boolean
+type Scene = {
+  eye: Vector3D
+  origin: Vector3D
 }
 
 const Grid: React.FC<React.SVGProps<SVGSVGElement> & GridProps> = (props) => {
@@ -127,6 +130,7 @@ const Grid: React.FC<React.SVGProps<SVGSVGElement> & GridProps> = (props) => {
                 key={column}
                 x={column}
                 y={row}
+                scene={SCENE}
                 isEnabled={(column * row) % 4 === 0}
                 isDebug={isDebug}
                 delay={Math.abs(row * column) * 0.7}
